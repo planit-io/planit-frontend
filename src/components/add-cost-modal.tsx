@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { travelService } from "@/services/travel-service";
+import { costService } from "@/services/cost-service";
 import { X, Loader2, Plus, Trash2, Users } from "lucide-react";
 import { CreateCostDTO, CreateCostUnitDTO } from "@/types/dtos";
 import { useToast } from "@/contexts/toast-context";
@@ -53,7 +54,7 @@ export default function AddCostModal({
     }, [tripTravelers, splits.length]);
 
     const mutation = useMutation({
-        mutationFn: (data: CreateCostDTO) => travelService.createCost(travelId, data),
+        mutationFn: (data: CreateCostDTO) => costService.createCost(travelId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["costs", travelId] });
             showToast("Expense added successfully!", "success");

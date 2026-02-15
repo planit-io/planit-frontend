@@ -2,30 +2,38 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { travelService } from "@/services/travel-service";
 import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { CreateTravelDTO } from "@/types/dtos";
+import { UpdateTravelDTO } from "@/types/dtos";
+import { useParams } from "next/navigation";
 
-export default function NewTripPage() {
+export default function EditTripPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
-    const [formData, setFormData] = useState<CreateTravelDTO>({
-        name: "",
-        description: "",
-        destination: "",
-        startDate: "",
-        endDate: "",
-        imageUrl: "",
+    const params = useParams();
+    const travelId = Number(params.travelId);
+    const { data: travel } = useQuery({
+        queryKey: ["travels", travelId],
+        queryFn: () => travelService.getById(travelId),
+    });
+    const [formData, setFormData] = useState<UpdateTravelDTO>({
+        name: travel?.name || "",
+        description: travel?.description || "",
+        destination: travel?.destination || "",
+        startDate: travel?.startDate || "",
+        endDate: travel?.endDate || "",
+        imageUrl: travel?.imageUrl || "",
         days: 0,
     });
 
     const mutation = useMutation({
-        mutationFn: (data: CreateTravelDTO) => travelService.create(data),
+        mutationFn: (data: UpdateTravelDTO) => travelService.update(travelId, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["travels"] });
-            router.push("/dashboard");
+            // Go to trips page
+            router.push("/trips/" + travelId);
         },
     });
 
@@ -54,17 +62,17 @@ export default function NewTripPage() {
         <div className="min-h-screen bg-gray-50 p-4 md:p-8">
             <div className="max-w-2xl mx-auto">
                 <Link
-                    href="/dashboard"
+                    href={`/trips/${travelId}`}
                     className="inline-flex items-center text-gray-500 hover:text-gray-900 mb-8 transition-colors"
                 >
                     <ArrowLeft size={20} className="mr-2" />
-                    Back to Dashboard
+                    Back to Trip
                 </Link>
 
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
                     <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900">Plan a New Trip</h1>
-                        <p className="text-gray-500 mt-2">Where are you heading next?</p>
+                        <h1 className="text-3xl font-bold text-gray-900">Edit Trip</h1>
+                        <p className="text-gray-500 mt-2">Update your trip details.</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -192,10 +200,10 @@ export default function NewTripPage() {
                                 {mutation.isPending ? (
                                     <>
                                         <Loader2 className="animate-spin" size={20} />
-                                        Creating Trip...
+                                        Updating Trip...
                                     </>
                                 ) : (
-                                    "Create Trip"
+                                    "Update Trip"
                                 )}
                             </button>
                         </div>

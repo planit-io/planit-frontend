@@ -112,7 +112,7 @@ export interface ActivityDTO {
     travelDayId?: number;
     name: string;
     description?: string;
-    time?: number; // integer format int32
+    time?: string;
     completed?: boolean;
     createDate?: number;
     lastUpdateDate?: number;
@@ -121,6 +121,12 @@ export interface ActivityDTO {
 export interface CreateActivityDTO {
     name: string;
     description?: string;
+}
+
+export interface CreateActivityDayDTO {
+    name: string;
+    description?: string;
+    time: string;
 }
 
 export interface UpdateActivityDTO {
@@ -158,6 +164,7 @@ export interface UpdateTravelDayDTO {
 
 export interface TravelDTO {
     id?: number;
+    description?: string;
     destination: string;
     name: string;
     code?: string;
@@ -171,6 +178,17 @@ export interface TravelDTO {
 }
 
 export interface CreateTravelDTO {
+    description: string;
+    destination: string;
+    name: string;
+    startDate: string; // LocalDate
+    endDate: string; // LocalDate
+    imageUrl?: string;
+    days?: number;
+}
+
+export interface UpdateTravelDTO {
+    description: string;
     destination: string;
     name: string;
     startDate: string; // LocalDate

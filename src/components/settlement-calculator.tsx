@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { costService } from "@/services/cost-service";
 import { travelService } from "@/services/travel-service";
 import { CostDTO } from "@/types/dtos";
 import { ArrowRight, TrendingUp, TrendingDown, Loader2, Copy, Check } from "lucide-react";
@@ -22,7 +23,7 @@ export default function SettlementCalculator({ travelId }: { travelId: number })
 
     const { data: costs, isLoading } = useQuery({
         queryKey: ["costs", travelId],
-        queryFn: () => travelService.getCosts(travelId),
+        queryFn: () => costService.getCosts(travelId),
     });
 
     const { data: travelers } = useQuery({

@@ -24,6 +24,7 @@ export default function AddActivityModal({
     const [formData, setFormData] = useState({
         name: "",
         description: "",
+        time: "",
     });
 
     const mutation = useMutation({
@@ -35,7 +36,7 @@ export default function AddActivityModal({
             queryClient.invalidateQueries({ queryKey: ["travelDays", travelId] });
             showToast("Activity added successfully!", "success");
             onClose();
-            setFormData({ name: "", description: "" });
+            setFormData({ name: "", description: "", time: "" });
         },
     });
 
@@ -77,6 +78,18 @@ export default function AddActivityModal({
                             placeholder="Details, time, location..."
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                        <input
+                            required
+                            type="time"
+                            name="activityTyme"
+                            value={formData.time || ""}
+                            onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+
                         />
                     </div>
 

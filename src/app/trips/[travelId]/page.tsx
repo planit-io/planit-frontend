@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { travelService } from "@/services/travel-service";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Calendar, DollarSign, Map, Users, Plus, CheckCircle2, Circle, TrendingUp, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, Map, Users, Plus, CheckCircle2, Circle, TrendingUp, ChevronDown, ChevronRight, FileText, Edit } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import React from "react";
@@ -13,13 +13,14 @@ import AddDayModal from "@/components/add-day-modal";
 import AddTravelerModal from "@/components/add-traveler-modal";
 import AddActivityModal from "@/components/add-activity-modal";
 import SettlementCalculator from "@/components/settlement-calculator";
+import { costService } from "@/services/cost-service";
 
 // --- Main Page Component ---
 
 export default function TripDetailPage() {
     const params = useParams();
     const travelId = Number(params.travelId);
-    const [activeTab, setActiveTab] = useState<"itinerary" | "expenses" | "settlement" | "travelers">("itinerary");
+    const [activeTab, setActiveTab] = useState<"description" | "itinerary" | "expenses" | "settlement" | "travelers">("description");
     const [isAddTravelerOpen, setIsAddTravelerOpen] = useState(false);
 
     const { data: travel, isLoading } = useQuery({
@@ -54,6 +55,9 @@ export default function TripDetailPage() {
                     <Link href="/dashboard" className="text-white/80 hover:text-white flex items-center gap-2 mb-6 w-fit transition-colors">
                         <ArrowLeft size={20} /> Back to Dashboard
                     </Link>
+                    <Link href={`/trips/${travelId}/edit`} className="text-white/80 hover:text-white flex items-center gap-2 mb-6 w-fit transition-colors">
+                        <Edit size={20} /> Edit Trip
+                    </Link>
                     <h1 className="text-4xl md:text-5xl font-bold text-white mb-3 tracking-tight">{travel.destination}</h1>
                     <p className="text-xl text-white/80 font-light mb-4">{travel.name}</p>
                     <div className="flex items-center gap-6 text-white/90">
@@ -69,6 +73,12 @@ export default function TripDetailPage() {
 
             <div className="max-w-5xl mx-auto px-4 -mt-8 relative z-10">
                 <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-2 flex overflow-x-auto mb-8">
+                    <TabButton
+                        active={activeTab === "description"}
+                        onClick={() => setActiveTab("description")}
+                        icon={<FileText size={18} />}
+                        label="Description"
+                    />
                     <TabButton
                         active={activeTab === "itinerary"}
                         onClick={() => setActiveTab("itinerary")}
@@ -96,6 +106,7 @@ export default function TripDetailPage() {
                 </div>
 
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {activeTab === "description" && <DescriptionTab travelId={travelId} />}
                     {activeTab === "itinerary" && <ItineraryTab travelId={travelId} />}
                     {activeTab === "expenses" && <ExpensesTab travelId={travelId} />}
                     {activeTab === "settlement" && (
@@ -139,6 +150,25 @@ function TabButton({ active, onClick, icon, label }: any) {
 }
 
 // --- Components for Tabs ---
+const DescriptionTab = ({ travelId }: { travelId: number }) => {
+
+    const { data: travel, isLoading } = useQuery({
+        queryKey: ["travel", travelId],
+        queryFn: () => travelService.getById(travelId),
+        enabled: !!travelId,
+    });
+
+    if (isLoading) return <div className="p-8 text-center text-gray-500">Loading description...</div>;
+
+    return (
+        <div className="space-y-6 pb-20">
+            <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
+                <p className="text-gray-600">{travel?.description}</p>
+            </div>
+        </div>
+    );
+}
 
 const ItineraryTab = ({ travelId }: { travelId: number }) => {
     const [isAddDayOpen, setIsAddDayOpen] = useState(false);
@@ -218,6 +248,7 @@ const DayCard = ({ day, travelId, onAddActivity }: { day: any, travelId: number,
                                     {act.completed ? <CheckCircle2 size={18} className="text-green-500" /> : <Circle size={18} />}
                                 </div>
                                 <div>
+                                    <h5 className="text-gray-500 text-sm">{act.time ? act.time : ""}</h5>
                                     <h4 className="font-medium text-gray-900">{act.name}</h4>
                                     {act.description && <p className="text-gray-500 text-sm mt-0.5">{act.description}</p>}
                                 </div>
@@ -237,7 +268,7 @@ function ExpensesTab({ travelId }: { travelId: number }) {
     const [expandedExpense, setExpandedExpense] = useState<number | null>(null);
     const { data: costs, isLoading } = useQuery({
         queryKey: ["costs", travelId],
-        queryFn: () => travelService.getCosts(travelId),
+        queryFn: () => costService.getCosts(travelId),
     });
 
     if (isLoading) return <div className="p-8 text-center text-gray-500">Loading expenses...</div>;
