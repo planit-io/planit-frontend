@@ -3,24 +3,25 @@
 import { useQuery } from "@tanstack/react-query";
 import { travelService } from "@/services/travel-service";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Calendar, DollarSign, Map, Users, Plus, CheckCircle2, Circle, TrendingUp, ChevronDown, ChevronRight, FileText, Edit } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, Map, Users, Plus, CheckCircle2, Circle, TrendingUp, ChevronDown, ChevronRight, FileText, Edit, DockIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import React from "react";
 import { cn } from "@/lib/utils";
-import AddCostModal from "@/components/add-cost-modal";
-import AddDayModal from "@/components/add-day-modal";
+import AddCostModal from "@/components/cost/add-cost-modal";
+import AddDayModal from "@/components/day/add-day-modal";
 import AddTravelerModal from "@/components/add-traveler-modal";
-import AddActivityModal from "@/components/add-activity-modal";
-import SettlementCalculator from "@/components/settlement-calculator";
+import AddActivityModal from "@/components/activity/add-activity-modal";
+import SettlementCalculator from "@/components/cost/settlement-calculator";
 import { costService } from "@/services/cost-service";
+import ActivityDayItem from "@/components/activity/activity-day-item";
 
 // --- Main Page Component ---
 
 export default function TripDetailPage() {
     const params = useParams();
     const travelId = Number(params.travelId);
-    const [activeTab, setActiveTab] = useState<"description" | "itinerary" | "expenses" | "settlement" | "travelers">("description");
+    const [activeTab, setActiveTab] = useState<"description" | "itinerary" | "expenses" | "settlement" | "travelers" | "documents">("description");
     const [isAddTravelerOpen, setIsAddTravelerOpen] = useState(false);
 
     const { data: travel, isLoading } = useQuery({
@@ -72,6 +73,7 @@ export default function TripDetailPage() {
             </div>
 
             <div className="max-w-5xl mx-auto px-4 -mt-8 relative z-10">
+
                 <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-2 flex overflow-x-auto mb-8">
                     <TabButton
                         active={activeTab === "description"}
@@ -103,6 +105,12 @@ export default function TripDetailPage() {
                         icon={<Users size={18} />}
                         label="Travelers"
                     />
+                    <TabButton
+                        active={activeTab === "documents"}
+                        onClick={() => setActiveTab("documents")}
+                        icon={<DockIcon size={18} />}
+                        label="Documents"
+                    />
                 </div>
 
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -120,6 +128,7 @@ export default function TripDetailPage() {
                             onAddTraveler={() => setIsAddTravelerOpen(true)}
                         />
                     )}
+                    {activeTab === "documents" && <DocumentsTab travelId={travelId} />}
                 </div>
             </div>
 
@@ -161,7 +170,7 @@ const DescriptionTab = ({ travelId }: { travelId: number }) => {
     if (isLoading) return <div className="p-8 text-center text-gray-500">Loading description...</div>;
 
     return (
-        <div className="space-y-6 pb-20">
+        <div className="space-y-6 pb-20 max-h-[70vh] overflow-y-auto">
             <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
                 <p className="text-gray-600">{travel?.description}</p>
@@ -193,7 +202,7 @@ const ItineraryTab = ({ travelId }: { travelId: number }) => {
                 </button>
             </div>
 
-            <div className="grid gap-6">
+            <div className="grid gap-6 max-h-[50vh] overflow-y-auto">
                 {days?.map((day: any) => (
                     <DayCard key={day.id} day={day} travelId={travelId} onAddActivity={() => setActiveDayId(day.id)} />
                 ))}
@@ -224,44 +233,79 @@ const ItineraryTab = ({ travelId }: { travelId: number }) => {
     );
 };
 
-const DayCard = ({ day, travelId, onAddActivity }: { day: any, travelId: number, onAddActivity: () => void }) => {
+const DayCard = ({
+    day,
+    travelId,
+    onAddActivity,
+}: {
+    day: any;
+    travelId: number;
+    onAddActivity: () => void;
+}) => {
+    const [open, setOpen] = useState(false);
+
+    const activitiesCount = day.activities?.length ?? 0;
+
     return (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden group hover:shadow-md transition-all">
-            <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            {/* Header (accordion trigger) */}
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className="w-full text-left bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center"
+            >
                 <div>
-                    <h3 className="font-bold text-lg text-gray-900">Day {day.dayNumber}: {day.name}</h3>
-                    <p className="text-gray-500 text-sm">{day.destination}</p>
+                    <h3 className="font-bold text-lg text-gray-900">
+                        Day {day.dayNumber}: {day.name}
+                    </h3>
+                    <p className="text-gray-500 text-sm">
+                        {day.destination}
+                        <span className="ml-2 text-gray-400">• {activitiesCount} activities</span>
+                    </p>
                 </div>
-                <button
-                    onClick={onAddActivity}
-                    className="text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-1"
-                >
-                    <Plus size={16} /> Activity
-                </button>
-            </div>
-            <div className="p-2">
-                {day.activities && day.activities.length > 0 ? (
-                    <div className="divide-y divide-gray-50">
-                        {day.activities.map((act: any) => (
-                            <div key={act.id} className="p-4 hover:bg-gray-50 rounded-lg transition-colors flex gap-3">
-                                <div className="mt-1 text-gray-400">
-                                    {act.completed ? <CheckCircle2 size={18} className="text-green-500" /> : <Circle size={18} />}
-                                </div>
-                                <div>
-                                    <h5 className="text-gray-500 text-sm">{act.time ? act.time : ""}</h5>
-                                    <h4 className="font-medium text-gray-900">{act.name}</h4>
-                                    {act.description && <p className="text-gray-500 text-sm mt-0.5">{act.description}</p>}
-                                </div>
+
+                <div className="flex items-center gap-2">
+                    {/* Add activity (shouldn't close the accordion) */}
+                    <button
+                        type="button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onAddActivity();
+                        }}
+                        className="text-indigo-600 hover:bg-indigo-50 p-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-1"
+                    >
+                        <Plus size={16} /> Activity
+                    </button>
+
+                    <ChevronDown
+                        size={18}
+                        className={`text-gray-400 transition-transform ${open ? "rotate-180" : "rotate-0"}`}
+                    />
+                </div>
+            </button>
+
+            {/* Content (accordion panel) */}
+            <div
+                className={`grid transition-[grid-template-rows] duration-200 ease-out ${open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+                    }`}
+            >
+                <div className="overflow-hidden">
+                    <div className="p-2">
+                        {day.activities && day.activities.length > 0 ? (
+                            <div className="divide-y divide-gray-50">
+                                {day.activities.map((act: any) => (
+                                    <ActivityDayItem activity={act} travelId={travelId} dayId={day.id} />
+                                ))}
                             </div>
-                        ))}
+                        ) : (
+                            <p className="p-6 text-center text-gray-400 text-sm italic">No activities yet.</p>
+                        )}
                     </div>
-                ) : (
-                    <p className="p-6 text-center text-gray-400 text-sm italic">No activities yet.</p>
-                )}
+                </div>
             </div>
         </div>
     );
-}
+};
 
 function ExpensesTab({ travelId }: { travelId: number }) {
     const [isAddOpen, setIsAddOpen] = useState(false);
@@ -383,6 +427,16 @@ function ExpensesTab({ travelId }: { travelId: number }) {
             </div>
 
             <AddCostModal travelId={travelId} isOpen={isAddOpen} onClose={() => setIsAddOpen(false)} />
+        </div>
+    );
+};
+
+
+const DocumentsTab = ({ travelId }: { travelId: number }) => {
+    return (
+        <div className="p-6">
+            <h2 className="text-2xl font-bold mb-4">Documents</h2>
+            <p className="text-gray-600">Documents for this trip will be displayed here.</p>
         </div>
     );
 };

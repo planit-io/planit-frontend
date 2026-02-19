@@ -133,7 +133,7 @@ export interface UpdateActivityDTO {
     // Empty in swagger but usually has fields
     name?: string;
     description?: string;
-    time?: number;
+    time?: string;
     completed?: boolean;
 }
 
