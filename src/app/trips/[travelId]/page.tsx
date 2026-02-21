@@ -7,7 +7,7 @@ import { ArrowLeft, Calendar, DollarSign, Map, Users, Plus, CheckCircle2, Circle
 import Link from "next/link";
 import { useState } from "react";
 import React from "react";
-import { cn } from "@/lib/utils";
+import { cn, formatLocalDateCustom } from "@/lib/utils";
 import AddCostModal from "@/components/cost/add-cost-modal";
 import AddDayModal from "@/components/day/add-day-modal";
 import AddTravelerModal from "@/components/add-traveler-modal";
@@ -256,7 +256,16 @@ const DayCard = ({
             >
                 <div>
                     <h3 className="font-bold text-lg text-gray-900">
-                        Day {day.dayNumber}: {day.name}
+                        {formatLocalDateCustom(
+                            day.date,
+                            "en-GB",
+                            {
+                                "day": "numeric",
+                                "month": "numeric",
+                                "year": "numeric",
+                                "weekday": "long",
+                            }
+                        )}
                     </h3>
                     <p className="text-gray-500 text-sm">
                         {day.destination}

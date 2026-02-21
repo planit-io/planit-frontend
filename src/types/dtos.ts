@@ -141,8 +141,7 @@ export interface TravelDayDTO {
     id?: number;
     travelId: number;
     dayNumber?: number;
-    name?: string;
-    description?: string;
+    date?: string; // LocalDate yyyy-MM-dd
     activities?: ActivityDTO[];
     createDate?: number;
     lastUpdateDate?: number;
