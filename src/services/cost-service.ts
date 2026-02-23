@@ -24,4 +24,14 @@ export const costService = {
     deleteCost: async (travelId: number, costId: number) => {
         await api.delete(`/api/travel/${travelId}/costs/${costId}`);
     },
+
+    getRefunds: async (travelId: number) => {
+        const response = await api.get<CostDTO[]>(`/api/travels/${travelId}/refunds`);
+        return response.data;
+    },
+
+    createRefund: async (travelId: number, refund: CreateCostDTO) => {
+        const response = await api.post<CostDTO>(`/api/travels/${travelId}/refunds`, refund);
+        return response.data;
+    },
 }

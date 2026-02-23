@@ -148,10 +148,7 @@ export interface TravelDayDTO {
 }
 
 export interface CreateTravelDayDTO {
-    destination: string;
-    name: string;
-    imageUrl?: string;
-    days?: number;
+    day: number;
 }
 
 export interface UpdateTravelDayDTO {

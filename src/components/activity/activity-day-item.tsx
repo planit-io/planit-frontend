@@ -3,11 +3,11 @@
 import { useState, useTransition } from "react";
 import { Pencil, Check, X } from "lucide-react";
 import { ActivityDTO } from "@/types/dtos";
-import { activityDayService } from "@/services/activity-day-service";
+import { activityService } from "@/services/activity-service";
 
 type Props = {
     travelId: number;
-    dayId: number;
+    dayId: number | null;
     activity: ActivityDTO;
 };
 
@@ -35,7 +35,7 @@ export default function ActivityDayItem({
 
         startTransition(async () => {
             try {
-                await activityDayService.markActivityCompletition(
+                await activityService.markActivityCompletition(
                     travelId,
                     dayId,
                     activity.id!,
@@ -65,7 +65,7 @@ export default function ActivityDayItem({
                 description,
             }
             try {
-                await activityDayService.updateActivity(
+                await activityService.updateActivity(
                     travelId,
                     dayId,
                     activity.id!,
@@ -107,12 +107,14 @@ export default function ActivityDayItem({
                 <div className="flex-1">
                     {isEditing ? (
                         <div className="space-y-2">
-                            <input
-                                type="time"
-                                value={time}
-                                onChange={(e) => setTime(e.target.value)}
-                                className="text-sm text-gray-500 border rounded px-2 py-1 w-24"
-                            />
+                            {dayId !== null && (
+                                <input
+                                    type="time"
+                                    value={time}
+                                    onChange={(e) => setTime(e.target.value)}
+                                    className="text-sm text-gray-500 border rounded px-2 py-1 w-24"
+                                />
+                            )}
 
                             <input
                                 value={name}

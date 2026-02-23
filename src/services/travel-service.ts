@@ -5,9 +5,6 @@ import {
     TravelDTO,
     CostDTO,
     CreateCostDTO,
-    ActivityDTO,
-    TravelDayDTO,
-    CreateTravelDayDTO,
     TravelerDTO,
     CreateTravelerDTO,
     UpdateTravelDTO
@@ -36,23 +33,6 @@ export const travelService = {
 
     delete: async (id: number) => {
         const response = await api.delete(`/api/travels/${id}`);
-        return response.data;
-    },
-
-
-    // Activities (Per Travel Day)
-    getActivities: async (travelId: number) => {
-        const response = await api.get<ActivityDTO[]>(`/api/travels/${travelId}/activities`);
-        return response.data;
-    },
-
-    // Travel Days
-    getDays: async (travelId: number) => {
-        const response = await api.get<TravelDayDTO[]>(`/api/travels/${travelId}/travelDays`);
-        return response.data;
-    },
-    createDay: async (travelId: number, data: CreateTravelDayDTO) => {
-        const response = await api.post<TravelDayDTO>(`/api/travels/${travelId}/travelDays`, data);
         return response.data;
     },
 

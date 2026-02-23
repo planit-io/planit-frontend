@@ -1,11 +1,10 @@
 "use client";
 
 import { useState } from "react";
-// We need to use raw api call here or add specific method for day activity
-import api from "@/lib/api";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { X, Loader2 } from "lucide-react";
-import { CreateActivityDTO } from "@/types/dtos";
+import { CreateActivityDayDTO } from "@/types/dtos";
+import { activityService } from "@/services/activity-service";
 import { useToast } from "@/contexts/toast-context";
 
 export default function AddActivityModal({
@@ -28,25 +27,28 @@ export default function AddActivityModal({
     });
 
     const mutation = useMutation({
-        mutationFn: async (data: CreateActivityDTO) => {
-            const res = await api.post(`/api/travels/${travelId}/travelDays/${travelDayId}/activities`, data);
-            return res.data;
+        mutationFn: async (data: CreateActivityDayDTO) => {
+            return await activityService.createActivity(travelId, travelDayId, data);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["travelDays", travelId] });
+            queryClient.invalidateQueries({ queryKey: ["activities", travelId] });
             showToast("Activity added successfully!", "success");
             onClose();
             setFormData({ name: "", description: "", time: "" });
         },
+        onError: () => {
+            showToast("Failed to add activity.", "error");
+        }
     });
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!travelDayId) return;
+        // travelDayId can be null for general activities
         mutation.mutate(formData);
     };
 
-    if (!isOpen || !travelDayId) return null;
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
@@ -81,17 +83,18 @@ export default function AddActivityModal({
                         />
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                        <input
-                            required
-                            type="time"
-                            name="activityTyme"
-                            value={formData.time || ""}
-                            onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-
-                        />
-                    </div>
+                    {travelDayId !== null && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                            <input
+                                required
+                                type="time"
+                                name="activityTime"
+                                value={formData.time || ""}
+                                onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                            />
+                        </div>
+                    )}
 
                     <div className="flex gap-3 mt-6">
                         <button
