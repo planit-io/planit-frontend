@@ -116,17 +116,20 @@ export interface ActivityDTO {
     completed?: boolean;
     createDate?: number;
     lastUpdateDate?: number;
+    travelAddress?: TravelAddressDTO;
 }
 
 export interface CreateActivityDTO {
     name: string;
     description?: string;
+    travelAddress?: TravelAddressDTO;
 }
 
 export interface CreateActivityDayDTO {
     name: string;
     description?: string;
     time: string;
+    travelAddress?: TravelAddressDTO;
 }
 
 export interface UpdateActivityDTO {
@@ -135,6 +138,7 @@ export interface UpdateActivityDTO {
     description?: string;
     time?: string;
     completed?: boolean;
+    travelAddress?: TravelAddressDTO;
 }
 
 export interface TravelDayDTO {
@@ -199,4 +203,24 @@ export interface RetrieveTravelDTO {
     startDate?: string;
     endDate?: string;
     userKeycloakId?: string;
+}
+
+export interface CreateTravelAddressDTO {
+    address: string;
+    note?: string;
+    activityId?: number;
+    activityDayId?: number;
+}
+
+export interface UpdateTravelAddressDTO {
+    address: string;
+    note?: string;
+}
+
+export interface TravelAddressDTO {
+    id?: number;
+    address: string;
+    note?: string;
+    activityId?: number;
+    activityDayId?: number;
 }

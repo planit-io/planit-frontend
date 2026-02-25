@@ -3,7 +3,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { travelService } from "@/services/travel-service";
 import { useParams } from "next/navigation";
-import { DollarSign, Map, Users, TrendingUp, FileText, DockIcon } from "lucide-react";
+import { DollarSign, Map, Users, TrendingUp, FileText, DockIcon, MapIcon, MapPin } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import AddTravelerModal from "@/components/add-traveler-modal";
@@ -15,11 +15,12 @@ import { TravelersTab } from "@/components/trip/tabs/travelers-tab";
 import { DocumentsTab } from "@/components/trip/tabs/documents-tab";
 import { TripHeader } from "@/components/trip/trip-header";
 import { useI18n } from "@/contexts/i18n-context";
+import { TravelAddressTab } from "@/components/trip/tabs/address-tab";
 
 export default function TripDetailPage() {
     const params = useParams();
     const travelId = Number(params.travelId);
-    const [activeTab, setActiveTab] = useState<"description" | "itinerary" | "expenses" | "settlement" | "travelers" | "documents">("description");
+    const [activeTab, setActiveTab] = useState<"description" | "travelAddress" | "itinerary" | "expenses" | "settlement" | "travelers" | "documents">("description");
     const [isAddTravelerOpen, setIsAddTravelerOpen] = useState(false);
     const { t } = useI18n();
 
@@ -43,12 +44,13 @@ export default function TripDetailPage() {
     if (!travel) return <div className="p-10 text-center">Trip not found</div>;
 
     const tabs = [
-        { key: "description", label: t("tabDescription"), icon: <FileText size={18} /> },
-        { key: "itinerary", label: t("tabItinerary"), icon: <Map size={18} /> },
-        { key: "expenses", label: t("tabExpenses"), icon: <DollarSign size={18} /> },
-        { key: "settlement", label: t("tabSettlement"), icon: <TrendingUp size={18} /> },
-        { key: "travelers", label: t("tabTravelers"), icon: <Users size={18} /> },
-        { key: "documents", label: t("tabDocuments"), icon: <DockIcon size={18} /> },
+        { key: "description", label: t("tabDescription"), icon: <FileText size={14} /> },
+        { key: "travelAddress", label: t("tabTravelAddress"), icon: <MapPin size={14} /> },
+        { key: "itinerary", label: t("tabItinerary"), icon: <Map size={14} /> },
+        { key: "expenses", label: t("tabExpenses"), icon: <DollarSign size={14} /> },
+        { key: "settlement", label: t("tabSettlement"), icon: <TrendingUp size={14} /> },
+        { key: "travelers", label: t("tabTravelers"), icon: <Users size={14} /> },
+        { key: "documents", label: t("tabDocuments"), icon: <DockIcon size={14} /> },
     ] as const;
 
     return (
@@ -77,6 +79,7 @@ export default function TripDetailPage() {
 
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {activeTab === "description" && <DescriptionTab travelId={travelId} />}
+                    {activeTab === "travelAddress" && <TravelAddressTab travelId={travelId} />}
                     {activeTab === "itinerary" && <ItineraryTab travelId={travelId} />}
                     {activeTab === "expenses" && <ExpensesTab travelId={travelId} />}
                     {activeTab === "settlement" && (

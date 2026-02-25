@@ -87,6 +87,17 @@ const en = {
     currency: "Currency",
     payers: "Payers",
     equalSplit: "Equal Split",
+    tabTravelAddress: "Addresses",
+    addresses: "Addresses",
+    address_deleted: "Address deleted correctly",
+    error_generic: "Error",
+    confirm_delete_address: "Confirm delete Address",
+    addresses_subtitle: "Save important places for the trip.",
+    no_addresses: "No addresses yet.",
+    no_addresses_hint: "Add your first one to keep everything in one place.",
+    add_first: "Add first address",
+    open_in_maps: "Open in Maps",
+
 };
 
 export type TranslationKey = keyof typeof en;

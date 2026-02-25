@@ -76,6 +76,7 @@ const es: PartialTranslations = {
     currency: "Moneda",
     payers: "Pagadores",
     equalSplit: "División igual",
+    addresses: "Direcciones",
 };
 
 export default es;

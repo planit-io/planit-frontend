@@ -76,6 +76,15 @@ const de: PartialTranslations = {
     currency: "Währung",
     payers: "Zahler",
     equalSplit: "Gleiche Aufteilung",
+    addresses: "Addresses",
+    address_deleted: "Addresses deleted correctly",
+    error_generic: "Error",
+    confirm_delete_address: "Confirm delete Address",
+    addresses_subtitle: "Save important places for the trip.",
+    no_addresses: "No addresses yet.",
+    no_addresses_hint: "Add your first one to keep everything in one place.",
+    add_first: "Add first address",
+    open_in_maps: "Open in Maps",
 };
 
 export default de;
