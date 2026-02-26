@@ -28,7 +28,7 @@ export const authOptions: NextAuthOptions = {
             if (token?.idToken) {
                 try {
                     // Construct Keycloak logout URL
-                    const issuerUrl = process.env.KEYCLOAK_ISSUER!;
+                    const issuerUrl = process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER!;
                     const logoutUrl = `${issuerUrl}/protocol/openid-connect/logout`;
                     const params = new URLSearchParams({
                         id_token_hint: token.idToken as string,
@@ -48,7 +48,7 @@ export const authOptions: NextAuthOptions = {
 
 // Helper function to get Keycloak logout URL
 export function getKeycloakLogoutUrl(idToken: string): string {
-    const issuerUrl = process.env.KEYCLOAK_ISSUER!;
+    const issuerUrl = process.env.NEXT_PUBLIC_KEYCLOAK_ISSUER!;
     const logoutUrl = `${issuerUrl}/protocol/openid-connect/logout`;
     const params = new URLSearchParams({
         id_token_hint: idToken,

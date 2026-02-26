@@ -1,27 +1,35 @@
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { travelService } from "@/services/travel-service";
-import { useParams } from "next/navigation";
-import { DollarSign, Map, Users, TrendingUp, FileText, DockIcon, MapIcon, MapPin } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useParams, useRouter } from "next/navigation";
+import { DollarSign, Map, Users, TrendingUp, DockIcon, MapPin, Loader2, ChevronLeft, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+import { travelService } from "@/services/travel-service";
+import { AppShell } from "@/components/layout/app-shell";
+
 import AddTravelerModal from "@/components/add-traveler-modal";
 import SettlementCalculator from "@/components/cost/settlement-calculator";
-import { DescriptionTab } from "@/components/trip/tabs/description-tab";
+import { TravelInfoTab } from "@/components/trip/tabs/travel-info-tab";
 import { ItineraryTab } from "@/components/trip/tabs/itinerary-tab";
 import { ExpensesTab } from "@/components/trip/tabs/expenses-tab";
 import { TravelersTab } from "@/components/trip/tabs/travelers-tab";
 import { DocumentsTab } from "@/components/trip/tabs/documents-tab";
 import { TripHeader } from "@/components/trip/trip-header";
 import { useI18n } from "@/contexts/i18n-context";
-import { TravelAddressTab } from "@/components/trip/tabs/address-tab";
+import EditTripModal from "@/components/trip/edit-trip-modal";
+
+type TabKey = "travelInfo" | "itinerary" | "expenses" | "settlement" | "travelers" | "documents";
 
 export default function TripDetailPage() {
     const params = useParams();
+    const router = useRouter();
     const travelId = Number(params.travelId);
-    const [activeTab, setActiveTab] = useState<"description" | "travelAddress" | "itinerary" | "expenses" | "settlement" | "travelers" | "documents">("description");
+
+    const [activeTab, setActiveTab] = useState<TabKey>("travelInfo");
     const [isAddTravelerOpen, setIsAddTravelerOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
     const { t } = useI18n();
 
     const { data: travel, isLoading } = useQuery({
@@ -30,76 +38,151 @@ export default function TripDetailPage() {
         enabled: !!travelId,
     });
 
+    const tabs = useMemo(
+        () =>
+            [
+                { key: "travelInfo", label: t("tabTravelInfo"), icon: MapPin },
+                { key: "itinerary", label: t("tabItinerary"), icon: Map },
+                { key: "expenses", label: t("tabExpenses"), icon: DollarSign },
+                { key: "settlement", label: t("tabSettlement"), icon: TrendingUp },
+                { key: "travelers", label: t("tabTravelers"), icon: Users },
+                { key: "documents", label: t("tabDocuments"), icon: DockIcon },
+            ] as const,
+        [t]
+    );
+
+    const backButton = (
+        <button
+            onClick={() => (window.history.length > 1 ? router.back() : router.push("/dashboard"))}
+            className="inline-flex items-center justify-center h-10 w-10 rounded-2xl hover:bg-gray-100 transition outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            aria-label="Back"
+            title="Back"
+        >
+            <ChevronLeft size={20} className="text-gray-700" />
+        </button>
+    );
+
+    const editButton = (
+        <button
+            onClick={() => setIsEditOpen(true)}
+            className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-white px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            aria-label="Edit trip"
+            title="Edit"
+        >
+            <Pencil size={16} />
+            <span className="hidden sm:inline">{t("editTrip")}</span>
+        </button>
+    );
+
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
-                <div className="animate-pulse flex flex-col items-center">
-                    <div className="h-12 w-12 bg-indigo-100 rounded-full mb-4"></div>
-                    <div className="text-indigo-600 font-medium">{t("loading")}</div>
+            <AppShell title={t("trip") || "Trip"} leftSlot={backButton}>
+                <div className="min-h-[70vh] flex items-center justify-center px-4">
+                    <div className="rounded-3xl border bg-white shadow-sm p-6 flex items-center gap-4">
+                        <Loader2 className="h-6 w-6 animate-spin text-indigo-600" />
+                        <div>
+                            <div className="font-semibold text-gray-900">{t("loading")}</div>
+                            <div className="text-sm text-gray-500">Preparing your trip…</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
+            </AppShell>
         );
     }
 
-    if (!travel) return <div className="p-10 text-center">Trip not found</div>;
+    if (!travel) {
+        return (
+            <AppShell title={t("trip") || "Trip"} leftSlot={backButton}>
+                <div className="rounded-3xl border bg-white shadow-sm p-10 text-center">Trip not found</div>
+            </AppShell>
+        );
+    }
 
-    const tabs = [
-        { key: "description", label: t("tabDescription"), icon: <FileText size={14} /> },
-        { key: "travelAddress", label: t("tabTravelAddress"), icon: <MapPin size={14} /> },
-        { key: "itinerary", label: t("tabItinerary"), icon: <Map size={14} /> },
-        { key: "expenses", label: t("tabExpenses"), icon: <DollarSign size={14} /> },
-        { key: "settlement", label: t("tabSettlement"), icon: <TrendingUp size={14} /> },
-        { key: "travelers", label: t("tabTravelers"), icon: <Users size={14} /> },
-        { key: "documents", label: t("tabDocuments"), icon: <DockIcon size={14} /> },
-    ] as const;
+    const bottomNav = (
+        <div className="md:hidden rounded-3xl border bg-white/90 backdrop-blur shadow-xl p-1.5">
+            <div className="grid grid-cols-6 gap-1">
+                {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const active = activeTab === tab.key;
 
-    return (
-        <div className="min-h-screen bg-gray-50 pb-20">
-            <TripHeader travel={travel} />
-
-            <div className="max-w-5xl mx-auto px-3 md:px-4 -mt-8 relative z-10">
-                {/* Tab bar — scrollable on mobile */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-1.5 flex overflow-x-auto mb-6 md:mb-8 gap-1 scrollbar-none">
-                    {tabs.map(tab => (
+                    return (
                         <button
                             key={tab.key}
                             onClick={() => setActiveTab(tab.key)}
                             className={cn(
-                                "flex items-center gap-1.5 px-3 md:px-5 py-2.5 rounded-lg font-medium transition-all whitespace-nowrap flex-shrink-0 outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 text-sm md:text-base",
-                                activeTab === tab.key
-                                    ? "bg-indigo-50 text-indigo-600 shadow-sm"
-                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                                "flex flex-col items-center justify-center gap-1 rounded-2xl py-2 transition outline-none",
+                                active ? "bg-indigo-600 text-white shadow" : "text-gray-600 hover:bg-gray-50"
                             )}
                         >
-                            <span className="flex-shrink-0">{tab.icon}</span>
-                            <span className="hidden sm:inline">{tab.label}</span>
+                            <Icon size={18} />
+                            <span className="text-[10px] font-semibold leading-none truncate max-w-[64px]">
+                                {tab.label}
+                            </span>
                         </button>
-                    ))}
-                </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
 
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    {activeTab === "description" && <DescriptionTab travelId={travelId} />}
-                    {activeTab === "travelAddress" && <TravelAddressTab travelId={travelId} />}
+    return (
+        <AppShell title={t("trip") || "Trip"}
+            leftSlot={backButton}
+            rightSlot={editButton}
+            bottomSlot={bottomNav}
+        >
+            <div className="rounded-3xl border border-gray-100 bg-white shadow-sm overflow-hidden">
+                <TripHeader travel={travel} />
+            </div>
+
+            <div className="hidden md:flex mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-1.5 gap-1 overflow-x-auto scrollbar-none">
+                {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const active = activeTab === tab.key;
+
+                    return (
+                        <button
+                            key={tab.key}
+                            onClick={() => setActiveTab(tab.key)}
+                            className={cn(
+                                "flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition whitespace-nowrap flex-shrink-0 outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2",
+                                active ? "bg-indigo-600 text-white shadow" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                            )}
+                        >
+                            <Icon size={16} />
+                            <span>{tab.label}</span>
+                        </button>
+                    );
+                })}
+            </div>
+
+            <div className="mt-4 md:mt-6 rounded-3xl border border-gray-100 bg-white shadow-sm p-3 md:p-6">
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+                    {activeTab === "travelInfo" && <TravelInfoTab travelId={travelId} />}
                     {activeTab === "itinerary" && <ItineraryTab travelId={travelId} />}
                     {activeTab === "expenses" && <ExpensesTab travelId={travelId} />}
+
                     {activeTab === "settlement" && (
-                        <div className="bg-white rounded-xl border border-gray-100 p-4 md:p-6 shadow-sm">
+                        <div className="bg-white">
                             <h2 className="text-2xl font-bold text-gray-900 mb-4">{t("tabSettlement")}</h2>
                             <SettlementCalculator travelId={travelId} />
                         </div>
                     )}
+
                     {activeTab === "travelers" && (
                         <TravelersTab travelId={travelId} onAddTraveler={() => setIsAddTravelerOpen(true)} />
                     )}
+
                     {activeTab === "documents" && <DocumentsTab travelId={travelId} />}
                 </div>
             </div>
 
-            <AddTravelerModal
+            <AddTravelerModal travelId={travelId} isOpen={isAddTravelerOpen} onClose={() => setIsAddTravelerOpen(false)} />
+            <EditTripModal
                 travelId={travelId}
-                isOpen={isAddTravelerOpen}
-                onClose={() => setIsAddTravelerOpen(false)}
+                isOpen={isEditOpen}
+                onClose={() => setIsEditOpen(false)}
             />
-        </div>
+        </AppShell>
     );
 }

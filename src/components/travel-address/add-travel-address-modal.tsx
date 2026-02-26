@@ -40,7 +40,6 @@ export default function CreateTravelAddressModal({
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // travelDayId can be null for general activities
         mutation.mutate(formData);
     };
 
@@ -50,7 +49,7 @@ export default function CreateTravelAddressModal({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
             <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
                 <div className="flex justify-between items-center p-6 border-b border-gray-100">
-                    <h2 className="text-xl font-bold text-gray-900">Add Activity</h2>
+                    <h2 className="text-xl font-bold text-gray-900">Add Address</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
                         <X size={24} />
                     </button>
@@ -92,7 +91,7 @@ export default function CreateTravelAddressModal({
                             disabled={mutation.isPending}
                             className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-lg shadow-lg shadow-indigo-200 hover:shadow-indigo-300 transition-all flex items-center justify-center gap-2 transform hover:-translate-y-0.5"
                         >
-                            {mutation.isPending ? <Loader2 className="animate-spin" size={20} /> : "Save Activity"}
+                            {mutation.isPending ? <Loader2 className="animate-spin" size={20} /> : "Save Address"}
                         </button>
                     </div>
                 </form>

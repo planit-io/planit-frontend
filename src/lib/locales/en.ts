@@ -20,6 +20,7 @@ const en = {
     tabSettlement: "Settlement",
     tabTravelers: "Travelers",
     tabDocuments: "Documents",
+    tabTravelInfo: "Travel Info",
     // Trip header
     days: "Days",
     // Itinerary
@@ -97,6 +98,11 @@ const en = {
     no_addresses_hint: "Add your first one to keep everything in one place.",
     add_first: "Add first address",
     open_in_maps: "Open in Maps",
+    no_description: "No description yet.",
+    profile: "Profile",
+    logout: "Logout",
+    swipe_down_hint: "Swipe down to close",
+    trip: "Trip",
 
 };
 

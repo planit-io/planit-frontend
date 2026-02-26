@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { travelService } from "@/services/travel-service";
@@ -27,6 +27,20 @@ export default function EditTripPage() {
         imageUrl: travel?.imageUrl || "",
         days: 0,
     });
+
+    useEffect(() => {
+        if (travel) {
+            setFormData({
+                name: travel.name,
+                description: travel.description || "",
+                destination: travel.destination,
+                startDate: travel.startDate,
+                endDate: travel.endDate,
+                imageUrl: travel.imageUrl,
+                days: travel.days,
+            });
+        }
+    }, [travel]);
 
     const mutation = useMutation({
         mutationFn: (data: UpdateTravelDTO) => travelService.update(travelId, data),
