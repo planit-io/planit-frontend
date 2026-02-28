@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "engines": {
-    "node": "18.x"
+    "node": "18.18.0"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
